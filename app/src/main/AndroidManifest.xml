@@ -16,7 +16,6 @@
         android:theme="@style/AppTheme">
         <!-- Include the AdActivity configChanges and theme. -->
 
-        <activity android:name="com.abhi.abcd.ListView" />
         <activity android:name="com.abhi.abcd.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
