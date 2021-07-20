@@ -42,7 +42,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     // Array of strings...
     ListView simpleList;
     TextView textView;
-    //String[] labels;
     private AdView adView;
     private AppListFinder appListFinder;
     private Handler mHandler;
@@ -52,7 +51,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     static ArrayAdapter<String> arrayAdapter;
     Runnable runOnUiThread;
     private Context getActivity;
-    //final Handler myHandler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +70,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         });
         // Gets the ad view defined in layout/ad_fragment.xml with ad unit ID set in
         // values/strings.xml.
-
 
         adView = findViewById(id.adView1);
         //AdRequest adRequest = new AdRequest.Builder().build();
