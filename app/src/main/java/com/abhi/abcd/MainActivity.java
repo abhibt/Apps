@@ -3,6 +3,7 @@ package com.abhi.abcd;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -93,21 +94,42 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
 //Do the fetching in a timer. Otherwise the App may take some time to come up.
         nCurrentTask = 0;
-        ShowSpinnerOnScreen(false);
 
         //Handler, creation of new handler.
         msghandler = new Handler() {
             @SuppressLint("HandlerLeak")
             @Override
             public void handleMessage(Message msg) {
+                String stringToDisplay;
                 Bundle bundle = msg.getData();
-                String stringToDisplay = bundle.getString("myKey");
-                ShowCustomToast(stringToDisplay);
-                ShowSpinnerOnScreen(true);
+                Integer nState = bundle.getInt("myKey");
+                switch(nState)
+                {
+                    case 0:
+                        stringToDisplay = bundle.getString("myKey");
+                        ShowCustomToast(stringToDisplay);
+                        ShowSpinnerOnScreen(true);
+                        EnableDisableButtonAndList(false);
+                        break;
+                    case 1:
+                    case 3:
+                        ShowSpinnerOnScreen(false);
+                        EnableDisableButtonAndList(true);
+                        break;
+                    case 2:
+                        stringToDisplay = bundle.getString("myKey");
+                        ShowCustomToast(stringToDisplay);
+                        ShowSpinnerOnScreen(true);
+                        EnableDisableButtonAndList(false);
+                        break;
+
+                    default: break;
+                }
+                arrayAdapter.notifyDataSetChanged();
             }
         };
 
-        Thread mythread = new Thread(new AppListFinder(getApplicationContext(), where));
+        Thread mythread = new Thread(new AppListFinder(getApplicationContext(), where, msghandler));
         mythread.start();
     }
     //Short text messages to be shown in the screen.
@@ -144,12 +166,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 }
 
                 //Enable or disable the drop down box and the button.
-    public void EnableDisableSpinner(final boolean bEnable) {
+    public void EnableDisableButtonAndList(final boolean bEnable) {
                                   Spinner spin = (Spinner) findViewById(R.id.backup_spinner);
                                   Button bBackup = (Button) findViewById(id.button);
                                   try {
                                       spin.setEnabled(bEnable);
-//                                      bBackup.setEnabled(bEnable);
+                                      bBackup.setEnabled(bEnable);
                                   } catch (Exception e) {
                                       e.printStackTrace();
                                   }
@@ -160,8 +182,15 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     public void showToast(View view) {
         //Send email to the entered email address;
-        final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
-        emailIntent.setType("text/plain");
+        //final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
+        //emailIntent.setType("text/plain");
+
+        String mailId="a@b";
+        Intent emailIntent = new Intent(Intent.ACTION_SEND, Uri.fromParts(
+                "mailto", mailId, null));
+        emailIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        emailIntent.setType("message/rfc822");
+        startActivity(Intent.createChooser(emailIntent, "Send Mail"));
 
         final View viewById;
 /*        viewById = findViewById(R.id.editTextTextEmailAddress);
@@ -180,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         emailIntent.setType("message/rfc822");
         try {
             startActivity(Intent.createChooser(emailIntent,
-                    "Send email using..."));
+                    "Choose only email app..."));
         } catch (android.content.ActivityNotFoundException ex) {
             Toast.makeText(getActivity(),
                     "No email clients installed.",
@@ -199,27 +228,29 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         final MainActivity thisView = this;
+        Thread mythread;
         System.out.println("Spinner Activity");
         //Toast.makeText(getApplicationContext(), R.array.Backup_List[0] , Toast.LENGTH_LONG).show();
         System.out.print(position);
+        EnableDisableButtonAndList(false);
         switch (position) {
             //app list
             case 0: //App list
-                //stoptimertask();
-                ShowCustomToast("Getting List of App List.Please Wait.");
-                nCurrentTask = 0;
- //             new Thread(new startMyTimer()).start();
+                ShowCustomToast("Getting Application List.Please Wait.");
+                mythread = new Thread(new AppListFinder(getApplicationContext(),where,msghandler));
+                mythread.start();
                 break;
             case 3: //SMS
                 break;
             case 1: //Contact
-                //setContentView (layout.activity_main);
-                Thread mythread = new Thread(new ContactListFinder(getApplicationContext(),where,msghandler));
+                ShowCustomToast("Getting Contact List.Please Wait.");
+                mythread = new Thread(new ContactListFinder(getApplicationContext(),where,msghandler));
                 mythread.start();
                 break;
             default:
                 break;
         }
+        simpleList.invalidate();
     }
 
     @Override

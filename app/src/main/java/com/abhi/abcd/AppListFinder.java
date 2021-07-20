@@ -3,6 +3,9 @@ package com.abhi.abcd;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -12,16 +15,29 @@ import java.util.Locale;
 class AppListFinder implements Runnable {
     Context currContext;
     List<String> where;
-    AppListFinder(Context cuContext, List<String> whereList)
+    Handler mScreenHandler;
+
+    AppListFinder(Context cuContext, List<String> whereList, Handler msghandler)
     {
         currContext = cuContext;
         where = whereList;
+        mScreenHandler = msghandler;
     }
 
     public void run(){
         Boolean bFound = false;
         String appName;
         String szActivities = null;
+
+
+        Message msg =mScreenHandler.obtainMessage();
+        Bundle bundle = new Bundle();
+        String dateString ="Getting Application List.Please Wait.";
+        bundle.putString("myKey", dateString);
+        bundle.putInt("myKey",2);
+        msg.setData(bundle);
+        mScreenHandler.sendMessage(msg);
+
         List<PackageInfo> packList = currContext.getPackageManager().getInstalledPackages(0);
 
         where.clear();
@@ -51,5 +67,11 @@ class AppListFinder implements Runnable {
         int nSize = where.size();
         String szAppsFound = nSize + " Apps Found.";
         where.add(szAppsFound);
+
+        Message msg1 =mScreenHandler.obtainMessage();
+        Bundle bundle1 = new Bundle();
+        bundle1.putInt("myKey",3);
+        msg1.setData(bundle1);
+        mScreenHandler.sendMessage(msg1);
     }
 }

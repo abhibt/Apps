@@ -46,6 +46,11 @@ class ContactListFinder implements Runnable {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        Message msg1 =mScreenHandler.obtainMessage();
+        Bundle bundle1 = new Bundle();
+        bundle1.putInt("myKey",1);
+        msg1.setData(bundle1);
+        mScreenHandler.sendMessage(msg1);
     }
 
     private void GetContacts() throws InterruptedException {
