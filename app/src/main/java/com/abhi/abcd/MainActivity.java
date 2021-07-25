@@ -1,8 +1,10 @@
 package com.abhi.abcd;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,14 +30,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import static com.abhi.abcd.R.array;
 import static com.abhi.abcd.R.id;
 import static com.abhi.abcd.R.layout;
 
-/*
-References- http://www.trivisonno.com/programming/update-android-gui-timer
-*/
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
     private int nCurrentTask = 0;
@@ -51,7 +51,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     static ArrayAdapter<String> arrayAdapter;
     Runnable runOnUiThread;
     private Context getActivity;
-
+    static boolean bRunning = false;
+    public static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 100;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,44 +92,54 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
 //Do the fetching in a timer. Otherwise the App may take some time to come up.
         nCurrentTask = 0;
+        try {
 
-        //Handler, creation of new handler.
-        msghandler = new Handler() {
-            @SuppressLint("HandlerLeak")
-            @Override
-            public void handleMessage(Message msg) {
-                String stringToDisplay;
-                Bundle bundle = msg.getData();
-                Integer nState = bundle.getInt("myKey");
-                switch(nState)
-                {
-                    case 0:
-                        stringToDisplay = bundle.getString("myKey");
-                        ShowCustomToast(stringToDisplay);
-                        ShowSpinnerOnScreen(true);
-                        EnableDisableButtonAndList(false);
-                        break;
-                    case 1:
-                    case 3:
-                        ShowSpinnerOnScreen(false);
-                        EnableDisableButtonAndList(true);
-                        break;
-                    case 2:
-                        stringToDisplay = bundle.getString("myKey");
-                        ShowCustomToast(stringToDisplay);
-                        ShowSpinnerOnScreen(true);
-                        EnableDisableButtonAndList(false);
-                        break;
+            //Handler, creation of new handler.
+            msghandler = new Handler() {
+                @SuppressLint("HandlerLeak")
+                @Override
+                public void handleMessage(Message msg) {
+                    String stringToDisplay;
+                    Bundle bundle = msg.getData();
+                    Integer nState = bundle.getInt("myKey");
+                    switch (nState) {
+                        case 0:
+                            stringToDisplay = bundle.getString("myKey");
+                            if(stringToDisplay != null)
+                                ShowCustomToast(stringToDisplay);
+                            ShowSpinnerOnScreen(true);
+                            EnableDisableButtonAndList(false);
+                            break;
+                        case 1:
+                        case 3:
+                            ShowSpinnerOnScreen(false);
+                            EnableDisableButtonAndList(true);
+                            break;
+                        case 2:
+                            stringToDisplay = bundle.getString("myKey");
+                            if(stringToDisplay != null)
+                                ShowCustomToast(stringToDisplay);
+                            ShowSpinnerOnScreen(true);
+                            EnableDisableButtonAndList(false);
+                            break;
 
-                    default: break;
+                        default:
+                            break;
+                    }
+                    arrayAdapter.notifyDataSetChanged();
                 }
-                arrayAdapter.notifyDataSetChanged();
-            }
-        };
-
+            };
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally
+        {
+            System.out.println("finally block executed");
+        }
         Thread mythread = new Thread(new AppListFinder(getApplicationContext(), where, msghandler));
         mythread.start();
     }
+
     //Short text messages to be shown in the screen.
     public void ShowCustomToast(final String szCustom) {
         runOnUiThread(new Runnable() {
@@ -143,9 +154,14 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            finally
+            {
+                System.out.println("finally block executed");
+            }
                 }
             });
     }
+
     //Show the rotating waiting icon
     public void ShowSpinnerOnScreen(final boolean bShow) {
         final Context applicationContext = getApplicationContext();
@@ -158,6 +174,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
+                    }
+                    finally
+                    {
+                        System.out.println("finally block executed");
                     }
                     //setContentView (layout.activity_main);
                 }
@@ -172,13 +192,17 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                                   } catch (Exception e) {
                                       e.printStackTrace();
                                   }
+                                  finally
+                                  {
+                                      System.out.println("finally block executed");
+                                  }
                           }
 
 
 
-
+    //Send email via email client. First Choose, then send.
     public void showToast(View view) {
-        //Send email to the entered email address;
+
         //final Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
         //emailIntent.setType("text/plain");
 
@@ -187,32 +211,38 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 "mailto", mailId, null));
         emailIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         emailIntent.setType("message/rfc822");
-        startActivity(Intent.createChooser(emailIntent, "Send Mail"));
+        if ( bRunning == false) {
+            bRunning = true;
+            startActivity(Intent.createChooser(emailIntent, "Send Mail"));
 
-        final View viewById;
+            final View viewById;
 /*        viewById = findViewById(R.id.editTextTextEmailAddress);
         final Intent intent;
         intent = emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{viewById.getContext().toString()});
  */
-        emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "App Manager:Backing up List of Apps");
-        Intent intent1;
-        int nTotalElements = simpleList.getCount();
-        String szEmailBody = "";
-        for (int i = 0; i < nTotalElements; i++) {
-            szEmailBody = szEmailBody + String.format("%d.%s\n", i, simpleList.getItemAtPosition(i));
-        }
+            emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "App Manager:Backing up List of Apps");
+            Intent intent1;
+            int nTotalElements = simpleList.getCount();
+            String szEmailBody = "";
+            for (int i = 0; i < nTotalElements; i++) {
+                szEmailBody = szEmailBody + String.format("%d.%s\n", i + 1, simpleList.getItemAtPosition(i));
+            }
 
-        intent1 = emailIntent.putExtra(Intent.EXTRA_TEXT, szEmailBody);
-        emailIntent.setType("message/rfc822");
-        try {
-            startActivity(Intent.createChooser(emailIntent,
-                    "Choose only email app..."));
-        } catch (android.content.ActivityNotFoundException ex) {
-            Toast.makeText(getActivity(),
-                    "No email clients installed.",
-                    Toast.LENGTH_SHORT).show();
+            intent1 = emailIntent.putExtra(Intent.EXTRA_TEXT, szEmailBody);
+            emailIntent.setType("message/rfc822");
+            try {
+                startActivity(Intent.createChooser(emailIntent,
+                        "Choose only email app..."));
+            } catch (android.content.ActivityNotFoundException ex) {
+                Toast.makeText(getActivity(),
+                        "No email clients installed.",
+                        Toast.LENGTH_SHORT).show();
+            } finally {
+                System.out.println("finally block executed");
+                bRunning = false;
+            }
+            bRunning = false;
         }
-
     }
 
     private Context getActivity() {
@@ -227,8 +257,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         final MainActivity thisView = this;
         Thread mythread;
         System.out.println("Spinner Activity");
-        //Toast.makeText(getApplicationContext(), R.array.Backup_List[0] , Toast.LENGTH_LONG).show();
-        System.out.print(position);
+        try {
+         System.out.print(position);
         EnableDisableButtonAndList(false);
         switch (position) {
             //app list
@@ -237,15 +267,32 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                 mythread = new Thread(new AppListFinder(getApplicationContext(),where,msghandler));
                 mythread.start();
                 break;
-            case 3: //SMS
-                break;
+
             case 1: //Contact
-                ShowCustomToast("Getting Contact List.Please Wait.");
-                mythread = new Thread(new ContactListFinder(getApplicationContext(),where,msghandler));
-                mythread.start();
+                PackageManager manager = getPackageManager();
+                String szPackage = getPackageName();
+                int hasPermission = manager.checkPermission ("android.permission.READ_CONTACTS", szPackage);
+                //ShowCustomToast("Need permission to get contact list. Please provide.");
+                if (hasPermission == manager.PERMISSION_GRANTED) {
+                    ShowCustomToast("Getting Contact List.Please Wait.");
+                    mythread = new Thread(new ContactListFinder(getApplicationContext(),where,msghandler));
+                    mythread.start();
+                }
+                else {
+                    ActivityCompat.requestPermissions(MainActivity.this,
+                            new String[]{Manifest.permission.READ_CONTACTS}, MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+                }
                 break;
             default:
                 break;
+        }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally
+        {
+            System.out.println("finally block executed");
         }
         simpleList.invalidate();
     }

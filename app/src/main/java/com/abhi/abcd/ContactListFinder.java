@@ -25,6 +25,8 @@ class ContactListFinder implements Runnable {
     List<String> where;
     Handler mScreenHandler;
     Handler mLocalHandler;
+    //Prevent multiple runs from happening
+    static boolean bRunning = false;
     ContactListFinder(Context cuContext, List<String> whereList, Handler mhandler)
     {
         currContext = cuContext;
@@ -36,21 +38,27 @@ class ContactListFinder implements Runnable {
 
         Message msg =mScreenHandler.obtainMessage();
         Bundle bundle = new Bundle();
-        String dateString ="Getting contact list, please Wait.";
-        bundle.putString("myKey", dateString);
-        bundle.putInt("myKey",0);
-        msg.setData(bundle);
-        mScreenHandler.sendMessage(msg);
-        try {
-            GetContacts();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if (bRunning == false) //Prevent multiple runs from happening
+        {
+            bRunning = true;
+            String dateString = "Getting contact list, please Wait.";
+            bundle.putString("myKey", dateString);
+            bundle.putInt("myKey", 0);
+            msg.setData(bundle);
+            mScreenHandler.sendMessage(msg);
+            try {
+                GetContacts();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            Message msg1 = mScreenHandler.obtainMessage();
+            Bundle bundle1 = new Bundle();
+            bundle1.putInt("myKey", 1);
+            msg1.setData(bundle1);
+            mScreenHandler.sendMessage(msg1);
+            bRunning = false;
         }
-        Message msg1 =mScreenHandler.obtainMessage();
-        Bundle bundle1 = new Bundle();
-        bundle1.putInt("myKey",1);
-        msg1.setData(bundle1);
-        mScreenHandler.sendMessage(msg1);
+
     }
 
     private void GetContacts() throws InterruptedException {
