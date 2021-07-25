@@ -41,8 +41,8 @@ class ContactListFinder implements Runnable {
         if (bRunning == false) //Prevent multiple runs from happening
         {
             bRunning = true;
-            String dateString = "Getting contact list, please Wait.";
-            bundle.putString("myKey", dateString);
+            ///String dateString = "Getting contact list, please Wait.";
+            bundle.putInt("StringKey", R.string.get_contact_list);
             bundle.putInt("myKey", 0);
             msg.setData(bundle);
             mScreenHandler.sendMessage(msg);

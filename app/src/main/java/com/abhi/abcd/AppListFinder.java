@@ -35,8 +35,7 @@ class AppListFinder implements Runnable {
             bRunning = true;
             Message msg = mScreenHandler.obtainMessage();
             Bundle bundle = new Bundle();
-            String dateString = "Getting Application List.Please Wait.";
-            bundle.putString("myKey", dateString);
+            bundle.putInt("StringKey", R.string.get_app_list);
             bundle.putInt("myKey", 2);
             msg.setData(bundle);
             mScreenHandler.sendMessage(msg);

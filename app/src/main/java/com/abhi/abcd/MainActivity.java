@@ -53,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private Context getActivity;
     static boolean bRunning = false;
     public static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 100;
+    boolean bActivityRunning = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -104,9 +105,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     Integer nState = bundle.getInt("myKey");
                     switch (nState) {
                         case 0:
-                            stringToDisplay = bundle.getString("myKey");
-                            if(stringToDisplay != null)
-                                ShowCustomToast(stringToDisplay);
+                            ShowCustomToast(bundle.getInt("StringKey"));
                             ShowSpinnerOnScreen(true);
                             EnableDisableButtonAndList(false);
                             break;
@@ -116,9 +115,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                             EnableDisableButtonAndList(true);
                             break;
                         case 2:
-                            stringToDisplay = bundle.getString("myKey");
-                            if(stringToDisplay != null)
-                                ShowCustomToast(stringToDisplay);
+                            ShowCustomToast(bundle.getInt("StringKey"));
                             ShowSpinnerOnScreen(true);
                             EnableDisableButtonAndList(false);
                             break;
@@ -141,7 +138,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     //Short text messages to be shown in the screen.
-    public void ShowCustomToast(final String szCustom) {
+    public void ShowCustomToast(final int nResId) {
+        final String szCustom = getString(nResId);
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -220,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         final Intent intent;
         intent = emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{viewById.getContext().toString()});
  */
-            emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, "App Manager:Backing up List of Apps");
+            emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, getString(R.string.bakup_app_list));
             Intent intent1;
             int nTotalElements = simpleList.getCount();
             String szEmailBody = "";
@@ -231,11 +229,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             intent1 = emailIntent.putExtra(Intent.EXTRA_TEXT, szEmailBody);
             emailIntent.setType("message/rfc822");
             try {
-                startActivity(Intent.createChooser(emailIntent,
-                        "Choose only email app..."));
+                startActivity(Intent.createChooser(emailIntent, getString(R.string.choose_email_app)));
             } catch (android.content.ActivityNotFoundException ex) {
                 Toast.makeText(getActivity(),
-                        "No email clients installed.",
+                        R.string.no_email_client_installed,
                         Toast.LENGTH_SHORT).show();
             } finally {
                 System.out.println("finally block executed");
@@ -256,45 +253,69 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         final MainActivity thisView = this;
         Thread mythread;
+  
         System.out.println("Spinner Activity");
         try {
-         System.out.print(position);
-        EnableDisableButtonAndList(false);
-        switch (position) {
-            //app list
-            case 0: //App list
-                ShowCustomToast("Getting Application List.Please Wait.");
-                mythread = new Thread(new AppListFinder(getApplicationContext(),where,msghandler));
-                mythread.start();
-                break;
+            System.out.print(position);
+            if (bActivityRunning == false) {
+                bActivityRunning = true;
 
-            case 1: //Contact
-                PackageManager manager = getPackageManager();
-                String szPackage = getPackageName();
-                int hasPermission = manager.checkPermission ("android.permission.READ_CONTACTS", szPackage);
-                //ShowCustomToast("Need permission to get contact list. Please provide.");
-                if (hasPermission == manager.PERMISSION_GRANTED) {
-                    ShowCustomToast("Getting Contact List.Please Wait.");
-                    mythread = new Thread(new ContactListFinder(getApplicationContext(),where,msghandler));
-                    mythread.start();
-                }
-                else {
-                    ActivityCompat.requestPermissions(MainActivity.this,
-                            new String[]{Manifest.permission.READ_CONTACTS}, MY_PERMISSIONS_REQUEST_READ_CONTACTS);
-                }
-                break;
-            default:
-                break;
-        }
+                EnableDisableButtonAndList(false);
+                switch (position) {
+                    //app list
+                    case 0: //App list
+                        ShowCustomToast(R.string.get_app_list);
+                        mythread = new Thread(new AppListFinder(getApplicationContext(), where, msghandler));
+                        where.clear();
+                        simpleList.invalidate();
+                        mythread.start();
+                        break;
 
-        } catch (Exception e) {
-            e.printStackTrace();
+                    case 1: //Contact
+                        PackageManager manager = getPackageManager();
+                        String szPackage = getPackageName();
+                        int hasPermission = manager.checkPermission("android.permission.READ_CONTACTS", szPackage);
+                        //ShowCustomToast("Need permission to get contact list. Please provide.");
+                        if (hasPermission == manager.PERMISSION_GRANTED) {
+                            ShowCustomToast(R.string.get_contact_list);
+                            where.clear();
+                            simpleList.invalidate();
+                            mythread = new Thread(new ContactListFinder(getApplicationContext(), where, msghandler));
+                            mythread.start();
+                        } else {
+                            where.clear();
+                            simpleList.invalidate();
+                            EnableDisableButtonAndList(true);
+                            ActivityCompat.requestPermissions(MainActivity.this,
+                                    new String[]{Manifest.permission.READ_CONTACTS}, MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+                            /*hasPermission = manager.checkPermission("android.permission.READ_CONTACTS", szPackage);
+                            if (hasPermission == manager.PERMISSION_GRANTED) {
+                                ShowCustomToast(R.string.get_contact_list);
+                                where.clear();
+                                simpleList.invalidate();
+                                mythread = new Thread(new ContactListFinder(getApplicationContext(), where, msghandler));
+                                mythread.start();
+                            } else {
+                                ShowCustomToast(R.string.provide_permissions);
+                                where.clear();
+                                EnableDisableButtonAndList(true);
+                                simpleList.invalidate();
+                            }*/
+                        }
+                        break;
+                    default:
+                        break;
+                }
+
+            }
+         bActivityRunning  =false;
         }
+        
         finally
         {
             System.out.println("finally block executed");
         }
-        simpleList.invalidate();
+        //simpleList.invalidate();
     }
 
     @Override
