@@ -283,9 +283,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                             mythread = new Thread(new ContactListFinder(getApplicationContext(), where, msghandler));
                             mythread.start();
                         } else {
-                            where.clear();
-                            simpleList.invalidate();
+                            //where.clear();
+                            //simpleList.invalidate();
                             EnableDisableButtonAndList(true);
+                            Spinner spin = (Spinner) findViewById(R.id.backup_spinner);
+                            spin.setSelection(0);
                             ActivityCompat.requestPermissions(MainActivity.this,
                                     new String[]{Manifest.permission.READ_CONTACTS}, MY_PERMISSIONS_REQUEST_READ_CONTACTS);
                             /*hasPermission = manager.checkPermission("android.permission.READ_CONTACTS", szPackage);

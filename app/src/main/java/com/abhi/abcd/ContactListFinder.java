@@ -109,9 +109,15 @@ class ContactListFinder implements Runnable {
                     while (pCur.moveToNext()) {
                         String phoneNo = pCur.getString(pCur.getColumnIndex(
                                 ContactsContract.CommonDataKinds.Phone.NUMBER));
-                        Log.i(TAG, "Name: " + name);
-                        Log.i(TAG, "Phone Number: " + phoneNo);
-                        where.add(String.format("%s,%s", name, phoneNo));
+                        Log.i(TAG, "Name: " + name.trim());
+                        Log.i(TAG, "Phone Number: " + phoneNo.trim());
+
+                        //Add only if the name is not present. Lot of duplicates were coming. Hence this was done.
+                        String szComposed = new String(name.trim() +","+ phoneNo.trim());
+                        if (where.contains(szComposed) == false) {
+
+                            where.add(szComposed);
+                        }
                     }
                     pCur.close();
                 }
