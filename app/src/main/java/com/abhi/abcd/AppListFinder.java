@@ -66,9 +66,9 @@ class AppListFinder implements Runnable {
                 }
             }
             //Once all the apps are fetched, then stop the timer task.
-            int nSize = where.size();
-            String szAppsFound = nSize + " Apps Found.";
-            where.add(szAppsFound);
+            //int nSize = where.size();
+            //String szAppsFound = nSize + " Apps Found.";
+            //where.add(szAppsFound);
 
             Message msg1 = mScreenHandler.obtainMessage();
             Bundle bundle1 = new Bundle();

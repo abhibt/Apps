@@ -27,6 +27,7 @@ import com.google.android.gms.ads.initialization.InitializationStatus;
 import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -103,6 +104,16 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     String stringToDisplay;
                     Bundle bundle = msg.getData();
                     Integer nState = bundle.getInt("myKey");
+
+                    //Remove duplicates. In Xiomi phones there was a problem with duplicates
+                    HashSet<String> hs = new HashSet<String>();
+                    //private static ArrayList<String> list= new ArrayList<String>();
+                    for(int i=0; i<where.size(); i++){
+                        hs.add(where.get(i));
+                    }
+                    where.clear();
+                    where.addAll(hs);
+
                     switch (nState) {
                         case 0:
                             ShowCustomToast(bundle.getInt("StringKey"));
@@ -123,6 +134,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                         default:
                             break;
                     }
+                    //Remove duplicates from the list.
                     arrayAdapter.notifyDataSetChanged();
                 }
             };
