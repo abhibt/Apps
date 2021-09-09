@@ -6,7 +6,7 @@ android {
         applicationId "com.abhi.backupmgr"
         minSdkVersion 16
         targetSdkVersion 29
-        versionCode 11
+        versionCode 12
         versionName "0.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
