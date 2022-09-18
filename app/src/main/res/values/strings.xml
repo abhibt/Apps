@@ -14,6 +14,7 @@
     <string name="no_email_client_installed">No email clients installed.</string>
     <string name="app_list">App List</string>
     <string name="contact">Contact</string>
+    <string name="transfer">Transfer</string>
     <string name="provide_permissions">Please provide permission to read contacts.</string>
     <!--
         This is an ad unit ID for an interstitial test ad. Replace with your own interstitial ad unit id.
@@ -23,9 +24,13 @@
     <string name="email_list">Email List</string>
 
     <string-array name="Backup_List">
-            <item>@string/app_list</item>
-            <item>@string/contact</item>
-            <!-- <item>SMS</item>-->
-        </string-array>
+        <item>@string/app_list</item>
+        <item>@string/contact</item>
+        <item>@string/transfer</item>
+        <!-- <item>SMS</item>-->
+    </string-array>
+    <string name="title_activity_fullscreen">FullscreenActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 
 </resources>

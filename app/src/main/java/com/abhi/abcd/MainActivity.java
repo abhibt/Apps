@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.StrictMode;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
@@ -58,6 +59,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
 
         setContentView(layout.activity_main);
         simpleList = findViewById(id.simpleListView);
@@ -316,6 +319,18 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                                 simpleList.invalidate();
                             }*/
                         }
+                        break;
+                    case 2: //FTP
+                        //https://www.youtube.com/watch?v=gYPgkHklZRs
+                        ShowCustomToast(R.string.get_app_list);
+                        //mythread = new Thread(new AppListFinder(getApplicationContext(), where, msghandler));
+                        //where.clear();
+                        //simpleList.invalidate();
+                        //mythread.start();
+                        //setContentView(layout.ftpconnect);
+                        //Intent i = new Intent(getApplicationContext(),FtpConnect.class);
+                        //startActivity(i);
+                        startActivity(new Intent(MainActivity.this, FtpConnector.class));
                         break;
                     default:
                         break;
